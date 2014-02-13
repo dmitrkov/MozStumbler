@@ -26,6 +26,7 @@ public final class Prefs {
     private static final String     GEOFENCE_HERE = "geofence_here";
     private static final String     GEOFENCE_SWITCH = "geofence_switch";
             static final String     WIFI_SCAN_ALWAYS = "wifi_scan_always";
+    private static final String     ENABLE_MULTIPLE_SIM_PREF = "enable_multiple_sim";
 
     private final Context mContext;
 
@@ -98,6 +99,10 @@ public final class Prefs {
 
     public boolean getWifiScanAlways() {
         return getBoolPref(WIFI_SCAN_ALWAYS);
+    }
+
+    public boolean isMultipleSimEnabled() {
+        return getPrefs().getBoolean(ENABLE_MULTIPLE_SIM_PREF, false);
     }
 
     ///

@@ -29,4 +29,10 @@
         android:summary="@string/wifi_scan_always_summary"
         android:defaultValue="false" />
 
+  <CheckBoxPreference
+        android:key="enable_multiple_sim"
+        android:title="@string/enable_multiple_sim_support_title"
+        android:summary="@string/enable_multiple_sim_support_summary"
+        android:defaultValue="false" />
+
 </PreferenceScreen>

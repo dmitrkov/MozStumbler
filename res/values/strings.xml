@@ -76,6 +76,8 @@
     <string name="geofencing_desc">MozStumbler will pause scanning within 1 km of this lat/long position.</string>
     <string name="geofencing_on">Geofencing @ %1$.3f, %2$.3f</string>
     <string name="geofencing_enable">Geofence this location</string>
+    <string name="enable_multiple_sim_support_title">Enable Multiple SIM support</string>
+    <string name="enable_multiple_sim_support_summary">Scan all radio interfaces on handset with Multiple SIM cards</string>
 
     <string name="wifi_scan_always_title">Always scan Wi-Fi</string>
     <string name="wifi_scan_always_summary">Scan APs even when Wi-Fi is turned off</string>
