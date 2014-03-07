@@ -26,6 +26,8 @@ public final class Prefs {
     private static final String     GEOFENCE_HERE = "geofence_here";
     private static final String     GEOFENCE_SWITCH = "geofence_switch";
             static final String     WIFI_SCAN_ALWAYS = "wifi_scan_always";
+    private static final String     SEND_TO_ADDITIONAL_SERVER_PREF = "send_to_additional_server";
+            static final String     ADDITIONAL_SERVER_URL_PREF = "additional_server_url";
 
     private final Context mContext;
 
@@ -98,6 +100,15 @@ public final class Prefs {
 
     public boolean getWifiScanAlways() {
         return getBoolPref(WIFI_SCAN_ALWAYS);
+    }
+
+    public boolean isAdditionalServerEnabled() {
+        return getPrefs().getBoolean(SEND_TO_ADDITIONAL_SERVER_PREF, false);
+    }
+
+    public String getAdditionalServerUrl() {
+        if (!isAdditionalServerEnabled()) return "";
+        return getPrefs().getString(ADDITIONAL_SERVER_URL_PREF, "");
     }
 
     ///

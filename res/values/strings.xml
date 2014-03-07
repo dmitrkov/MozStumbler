@@ -76,6 +76,8 @@
     <string name="geofencing_desc">MozStumbler will pause scanning within 1 km of this lat/long position.</string>
     <string name="geofencing_on">Geofencing @ %1$.3f, %2$.3f</string>
     <string name="geofencing_enable">Geofence this location</string>
+    <string name="send_to_additional_server_title">Send reports to an additional server</string>
+    <string name="additional_server_url_title">URL of additional server</string>
 
     <string name="wifi_scan_always_title">Always scan Wi-Fi</string>
     <string name="wifi_scan_always_summary">Scan APs even when Wi-Fi is turned off</string>

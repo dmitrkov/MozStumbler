@@ -21,7 +21,7 @@ public class Submitter extends AbstractCommunicator {
         mNickname = prefs.getNickname();
     }
 
-    String getUrlString() {
+    protected String getUrlString() {
         return SUBMIT_URL;
     }
 

@@ -29,6 +29,7 @@ public class PreferencesScreen extends PreferenceActivity {
     private CheckBoxPreference mGeofenceSwitch;
     private Preference mGeofenceHere;
     private CheckBoxPreference mWifiScanAlwaysSwitch;
+    private EditTextPreference mAdditionalServerUrlPreference;
     private Prefs mPrefs;
 
     @SuppressWarnings("deprecation")
@@ -47,11 +48,13 @@ public class PreferencesScreen extends PreferenceActivity {
         mGeofenceSwitch = (CheckBoxPreference) getPreferenceManager().findPreference("geofence_switch");
         mGeofenceHere = getPreferenceManager().findPreference("geofence_here");
         mWifiScanAlwaysSwitch = (CheckBoxPreference)getPreferenceManager().findPreference(Prefs.WIFI_SCAN_ALWAYS);
+        mAdditionalServerUrlPreference = (EditTextPreference) getPreferenceManager().findPreference(Prefs.ADDITIONAL_SERVER_URL_PREF);
 
         mPrefs = new Prefs(this);
 
         setNicknamePreferenceTitle(mPrefs.getNickname());
         mWifiPreference.setChecked(mPrefs.getWifi());
+        mAdditionalServerUrlPreference.setSummary(mAdditionalServerUrlPreference.getText());
         setGeofenceSwitchTitle();
         boolean geofence_here = mPrefs.getGeofenceHere();
         if(geofence_here) { mPrefs.setGeofenceState(true); }
@@ -99,6 +102,14 @@ public class PreferencesScreen extends PreferenceActivity {
                     mPrefs.setGeofenceHere(false);
                     setGeofenceHereDesc(false);
                 }
+                return true;
+            }
+        });
+
+        mAdditionalServerUrlPreference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                mAdditionalServerUrlPreference.setSummary((CharSequence)o);
                 return true;
             }
         });
