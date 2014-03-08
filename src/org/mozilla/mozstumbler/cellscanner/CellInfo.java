@@ -41,6 +41,7 @@ public class CellInfo implements Parcelable {
 
     private String mRadio;
     private String mCellRadio;
+    private int mCellNetworkType;
 
     private int mMcc;
     private int mMnc;
@@ -59,6 +60,7 @@ public class CellInfo implements Parcelable {
     private CellInfo(Parcel in) {
         mRadio = in.readString();
         mCellRadio = in.readString();
+        mCellNetworkType = in.readInt();
         mMcc = in.readInt();
         mMnc = in.readInt();
         mCid = in.readInt();
@@ -102,6 +104,7 @@ public class CellInfo implements Parcelable {
 
         try {
             obj.put("radio", getCellRadio());
+            obj.put("network_type", getNetworkTypeName(mCellNetworkType));
             obj.put("mcc", mMcc);
             obj.put("mnc", mMnc);
             if (mLac != UNKNOWN_CID) obj.put("lac", mLac);
@@ -136,6 +139,7 @@ public class CellInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mRadio);
         dest.writeString(mCellRadio);
+        dest.writeInt(mCellNetworkType);
         dest.writeInt(mMcc);
         dest.writeInt(mMnc);
         dest.writeInt(mCid);
@@ -149,6 +153,7 @@ public class CellInfo implements Parcelable {
     void reset() {
         mRadio = RADIO_GSM;
         mCellRadio = CELL_RADIO_GSM;
+        mCellNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mMcc = UNKNOWN_CID;
         mMnc = UNKNOWN_CID;
         mLac = UNKNOWN_CID;
@@ -174,6 +179,7 @@ public class CellInfo implements Parcelable {
 
             reset();
             mCellRadio = getCellRadioTypeName(networkType);
+            mCellNetworkType = networkType;
             setNetworkOperator(networkOperator);
 
             lac = gcl.getLac();
@@ -194,6 +200,7 @@ public class CellInfo implements Parcelable {
 
             reset();
             mCellRadio = getCellRadioTypeName(networkType);
+            mCellNetworkType = networkType;
 
             setNetworkOperator(networkOperator);
 
@@ -215,6 +222,7 @@ public class CellInfo implements Parcelable {
 
         reset();
         mCellRadio = getCellRadioTypeName(nci.getNetworkType());
+        mCellNetworkType = nci.getNetworkType();
         setNetworkOperator(networkOperator);
 
         lac = nci.getLac();
@@ -230,6 +238,7 @@ public class CellInfo implements Parcelable {
 
     void setGsmCellInfo(int mcc, int mnc, int lac, int cid, int asu) {
         mCellRadio = CELL_RADIO_GSM;
+        mCellNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mMcc = mcc != Integer.MAX_VALUE ? mcc : UNKNOWN_CID;
         mMnc = mnc != Integer.MAX_VALUE ? mnc : UNKNOWN_CID;
         mLac = lac != Integer.MAX_VALUE ? lac : UNKNOWN_CID;
@@ -239,6 +248,7 @@ public class CellInfo implements Parcelable {
 
     void setWcmdaCellInfo(int mcc, int mnc, int lac, int cid, int psc, int asu) {
         mCellRadio = CELL_RADIO_UMTS;
+        mCellNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mMcc = mcc != Integer.MAX_VALUE ? mcc : UNKNOWN_CID;
         mMnc = mnc != Integer.MAX_VALUE ? mnc : UNKNOWN_CID;
         mLac = lac != Integer.MAX_VALUE ? lac : UNKNOWN_CID;
@@ -259,6 +269,7 @@ public class CellInfo implements Parcelable {
      */
     void setLteCellInfo(int mcc, int mnc, int ci, int pci, int tac, int asu, int ta) {
         mCellRadio = CELL_RADIO_LTE;
+        mCellNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mMcc = mcc != Integer.MAX_VALUE ? mcc : UNKNOWN_CID;
         mMnc = mnc != Integer.MAX_VALUE ? mnc : UNKNOWN_CID;
         mLac = tac != Integer.MAX_VALUE ? tac : UNKNOWN_CID;
@@ -270,10 +281,15 @@ public class CellInfo implements Parcelable {
 
     void setCdmaCellInfo(int baseStationId, int networkId, int systemId, int dbm) {
         mCellRadio = CELL_RADIO_CDMA;
+        mCellNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mMnc = systemId != Integer.MAX_VALUE ? systemId : UNKNOWN_CID;
         mLac = networkId != Integer.MAX_VALUE ? networkId : UNKNOWN_CID;
         mCid = baseStationId != Integer.MAX_VALUE ? baseStationId : UNKNOWN_CID;
         mSignal = dbm;
+    }
+
+    void setCellNetworkType(int networkType) {
+        mCellNetworkType = networkType;
     }
 
     void setNetworkOperator(String mccMnc) {
@@ -316,6 +332,9 @@ public class CellInfo implements Parcelable {
             case TelephonyManager.NETWORK_TYPE_IDEN:
                 return CELL_RADIO_CDMA;
 
+            case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+                return "unknown";
+
             default:
                 Log.e(LOGTAG, "", new IllegalArgumentException("Unexpected network type: " + networkType));
                 return String.valueOf(networkType);
@@ -342,6 +361,43 @@ public class CellInfo implements Parcelable {
         }
     }
 
+    public static String getNetworkTypeName(int type) {
+        switch (type) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                return "GPRS";
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return "EDGE";
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                return "UMTS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+                return "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+                return "HSUPA";
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+                return "HSPA";
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+                return "CDMA";
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+                return "CDMA - EvDo rev. 0";
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+                return "CDMA - EvDo rev. A";
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                return "CDMA - EvDo rev. B";
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return "CDMA - 1xRTT";
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return "LTE";
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+                return "CDMA - eHRPD";
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+                return "iDEN";
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+                return "HSPA+";
+            default:
+                return "UNKNOWN(" + String.valueOf(type) + ")" ;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -351,6 +407,7 @@ public class CellInfo implements Parcelable {
         CellInfo ci = (CellInfo) o;
         return mRadio.equals(ci.mRadio)
                && mCellRadio.equals(ci.mCellRadio)
+               && mCellNetworkType == ci.mCellNetworkType
                && mMcc == ci.mMcc
                && mMnc == ci.mMnc
                && mCid == ci.mCid
@@ -366,6 +423,7 @@ public class CellInfo implements Parcelable {
         int result = 17;
         result = 31 * result + mRadio.hashCode();
         result = 31 * result + mCellRadio.hashCode();
+        result = 31 * result + mCellNetworkType;
         result = 31 * result + mMcc;
         result = 31 * result + mMnc;
         result = 31 * result + mCid;
