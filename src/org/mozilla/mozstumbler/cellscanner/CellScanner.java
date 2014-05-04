@@ -6,6 +6,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.mozilla.mozstumbler.ScannerService;
+import org.mozilla.mozstumbler.preferences.Prefs;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,12 +44,24 @@ public class CellScanner {
         if (mImpl != null) {
             return;
         }
+        Prefs prefs = new Prefs(mContext);
 
-        try {
-            mImpl = new DefaultCellScanner(mContext);
-        } catch (UnsupportedOperationException uoe) {
-            Log.e(LOGTAG, "Cell scanner probe failed", uoe);
-            return;
+        if ((mImpl == null) && prefs.isSamsungServiceModeEnabled()) {
+            try {
+                mImpl = new SamsungServiceModeCellScanner(mContext);
+            } catch (UnsupportedOperationException uoe) {
+                Log.e(LOGTAG, "SamsungServiceModeCellScanner() probe failed", uoe);
+                mImpl = null;
+            }
+        }
+
+        if (mImpl == null) {
+            try {
+                mImpl = new DefaultCellScanner(mContext);
+            } catch (UnsupportedOperationException uoe) {
+                Log.e(LOGTAG, "Cell scanner probe failed", uoe);
+                return;
+            }
         }
 
         mImpl.start();
