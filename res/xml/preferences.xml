@@ -29,4 +29,10 @@
         android:summary="@string/wifi_scan_always_summary"
         android:defaultValue="false" />
 
+    <CheckBoxPreference
+        android:key="enable_samsung_service_mode"
+        android:title="@string/enable_samsung_service_mode"
+        android:summary="@string/enable_samsung_service_mode_summary"
+        android:defaultValue="false" />
+
 </PreferenceScreen>
