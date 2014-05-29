@@ -29,4 +29,9 @@
         android:summary="@string/wifi_scan_always_summary"
         android:defaultValue="false" />
 
+    <CheckBoxPreference
+        android:key="enable_screen_is_off_workaround"
+        android:title="@string/enable_screen_is_off_workaround"
+        android:summary="@string/enable_screen_is_off_workaround_summary"
+        android:defaultValue="false" />
 </PreferenceScreen>

@@ -10,6 +10,9 @@ import android.telephony.CellLocation;
 import android.util.Log;
 
 import org.mozilla.mozstumbler.BuildConfig;
+import org.mozilla.mozstumbler.preferences.Prefs;
+
+import java.io.IOException;
 
 /**
  * Determine whether the cell location is updated when the screen is off
@@ -29,6 +32,7 @@ public class ScreenMonitor {
     private boolean mScreenIsOn;
     private long mLocationUpdatesCount = NO_DATA;
     private long mFirstChangeTimestamp;
+    private boolean mScreenOffWorkaroundActivated;
 
     private CellLocation mCellLocation;
 
@@ -46,6 +50,11 @@ public class ScreenMonitor {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         mContext.registerReceiver(mScreenReceiver, filter);
+        if (new Prefs(mContext).isScreenOffWorkaroundEnabled()) {
+            mScreenOffWorkaroundActivated = true;
+            // Run once
+            new Thread(mReportScreenIsOnRunnable).start();
+        }
     }
 
     public void putLocation(CellLocation location) {
@@ -102,10 +111,32 @@ public class ScreenMonitor {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 mScreenIsOn = false;
                 mCellLocation = null;
+                if (mScreenOffWorkaroundActivated) {
+                    if (DBG) Log.v(LOGTAG, "Screen is off. Running workaround");
+                    new Thread(mReportScreenIsOnRunnable).start();
+                }
             } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
                 mScreenIsOn = true;
                 mFirstChangeTimestamp = 0;
                 mCellLocation = null;
+
+            }
+        }
+    };
+
+    public final Runnable mReportScreenIsOnRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            try {
+                Runtime.getRuntime().exec(new String[] { "su", "-c",
+                        "am broadcast -a android.intent.action.SCREEN_ON com.android.phone" });
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     };
