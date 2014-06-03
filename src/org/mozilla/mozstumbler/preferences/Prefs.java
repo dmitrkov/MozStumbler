@@ -26,6 +26,8 @@ public final class Prefs {
     private static final String     GEOFENCE_SWITCH = "geofence_switch";
             static final String     WIFI_SCAN_ALWAYS = "wifi_scan_always";
     private static final String     ENABLE_SCREEN_IS_OFF_WORKAROUND_PREF = "enable_screen_is_off_workaround";
+    private static final String     SEND_TO_ADDITIONAL_SERVER_PREF = "send_to_additional_server";
+            static final String     ADDITIONAL_SERVER_URL_PREF = "additional_server_url";
 
     private final Context mContext;
 
@@ -107,6 +109,14 @@ public final class Prefs {
 
     public boolean isScreenOffWorkaroundEnabled() {
         return getPrefs().getBoolean(ENABLE_SCREEN_IS_OFF_WORKAROUND_PREF, false);
+    }
+    public boolean isAdditionalServerEnabled() {
+        return getPrefs().getBoolean(SEND_TO_ADDITIONAL_SERVER_PREF, false);
+    }
+
+    public String getAdditionalServerUrl() {
+        if (!isAdditionalServerEnabled()) return "";
+        return getPrefs().getString(ADDITIONAL_SERVER_URL_PREF, "");
     }
 
     ///

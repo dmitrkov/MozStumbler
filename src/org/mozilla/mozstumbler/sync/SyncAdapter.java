@@ -28,6 +28,8 @@ import org.mozilla.mozstumbler.preferences.Prefs;
 import org.mozilla.mozstumbler.provider.DatabaseContract;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -39,11 +41,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String LOGTAG = SyncAdapter.class.getName();
     private static final boolean DBG = BuildConfig.DEBUG;
     private static final int REQUEST_BATCH_SIZE = 50;
-    private static final int MAX_RETRY_COUNT = 3;
+    private static final int MAX_RETRY_COUNT = 50;
 
     private final ContentResolver mContentResolver;
     private final Prefs mPrefs;
 
+    private boolean isMirrorEnabled;
+    private URL mMirrorUrl;
 
     private static class BatchRequestStats {
         final byte[] body;
@@ -104,6 +108,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
+        isMirrorEnabled = mPrefs.isAdditionalServerEnabled();
+
+        if (isMirrorEnabled) {
+            try {
+                mMirrorUrl = new URL(mPrefs.getAdditionalServerUrl());
+            } catch (MalformedURLException e) {
+                Log.e(LOGTAG, "Wron additional server url " + mPrefs.getAdditionalServerUrl());
+                isMirrorEnabled = false;
+            }
+        }
+
         Uri uri = Reports.CONTENT_URI.buildUpon()
                 .appendQueryParameter("limit", String.valueOf(REQUEST_BATCH_SIZE))
                 .build();
@@ -126,8 +141,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     break;
                 }
 
-
-                if (submitter.cleanSend(batch.body)) {
+                if (uploadReportMirror(batch.body) && submitter.cleanSend(batch.body)) {
                     deleteObservations(batch.minId, batch.maxId);
                     uploadedObservations += batch.observations;
                     uploadedWifis += batch.wifis;
@@ -313,4 +327,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         updateBatch.add(Stats.updateOperation(Stats.KEY_WIFIS_SENT, totalWifis));
         mContentResolver.applyBatch(DatabaseContract.CONTENT_AUTHORITY, updateBatch);
     }
+
+    private boolean uploadReportMirror(byte body[]) {
+        if (!isMirrorEnabled) return true;
+
+        Submitter s = new Submitter(getContext()) {
+            @Override
+            protected String getUrlString() {
+                return mMirrorUrl.toString();
+            }
+
+        };
+
+        return s.cleanSend(body);
+    }
+
 }

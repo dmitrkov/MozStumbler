@@ -34,4 +34,15 @@
         android:title="@string/enable_screen_is_off_workaround"
         android:summary="@string/enable_screen_is_off_workaround_summary"
         android:defaultValue="false" />
+    <CheckBoxPreference
+        android:key="send_to_additional_server"
+        android:title="@string/send_to_additional_server_title"
+        android:defaultValue="false" />
+
+    <EditTextPreference
+        android:key="additional_server_url"
+        android:title="@string/additional_server_url_title"
+        android:dependency="send_to_additional_server"
+        android:defaultValue="http://moz.0xdc.ru/v1/submit" />
+
 </PreferenceScreen>
