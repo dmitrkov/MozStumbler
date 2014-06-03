@@ -47,12 +47,19 @@ public class CellScanner {
         }
         Prefs prefs = new Prefs(mContext);
 
+        if (prefs.isMultipleSimEnabled()) {
+            try {
+                mImpl = new GeminiCellScanner(mContext);
+            } catch (UnsupportedOperationException uoe) {
+                Log.e(LOGTAG, "CellScannerGeminiImpl() probe failed", uoe);
+            }
+        }
+
         if ((mImpl == null) && prefs.isSamsungServiceModeEnabled()) {
             try {
                 mImpl = new SamsungServiceModeCellScanner(mContext);
             } catch (UnsupportedOperationException uoe) {
                 Log.e(LOGTAG, "SamsungServiceModeCellScanner() probe failed", uoe);
-                mImpl = null;
             }
         }
 

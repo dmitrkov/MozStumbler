@@ -29,6 +29,7 @@ public final class Prefs {
     private static final String     SEND_TO_ADDITIONAL_SERVER_PREF = "send_to_additional_server";
             static final String     ADDITIONAL_SERVER_URL_PREF = "additional_server_url";
     private static final String     ENABLE_SAMSUNG_SERVICE_MODE_PREF = "enable_samsung_service_mode";
+    private static final String     ENABLE_MULTIPLE_SIM_PREF = "enable_multiple_sim";
 
     private final Context mContext;
 
@@ -122,6 +123,9 @@ public final class Prefs {
 
     public boolean isSamsungServiceModeEnabled() {
         return getPrefs().getBoolean(ENABLE_SAMSUNG_SERVICE_MODE_PREF, false);
+    }
+    public boolean isMultipleSimEnabled() {
+        return getPrefs().getBoolean(ENABLE_MULTIPLE_SIM_PREF, false);
     }
 
     ///

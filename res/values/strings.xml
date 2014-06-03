@@ -88,6 +88,8 @@
 
     <string name="enable_samsung_service_mode">Enable Samsung service mode</string>
     <string name="enable_samsung_service_mode_summary">Use data available from Samsung Service Mode (if supported)</string>
+    <string name="enable_multiple_sim_support_title">Enable Multiple SIM support</string>
+    <string name="enable_multiple_sim_support_summary">Scan all radio interfaces on handset with Multiple SIM cards</string>
 
     <string name="wifi_scan_always_title">Always scan Wi-Fi</string>
     <string name="wifi_scan_always_summary">Scan APs even when Wi-Fi is turned off</string>

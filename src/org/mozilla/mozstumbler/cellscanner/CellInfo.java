@@ -99,6 +99,10 @@ public class CellInfo implements Parcelable {
         return mPsc;
     }
 
+    public int getSignal() {return mSignal; }
+
+    public int getAsu() { return mAsu; }
+
     public JSONObject toJSONObject() {
         final JSONObject obj = new JSONObject();
 
@@ -166,6 +170,10 @@ public class CellInfo implements Parcelable {
 
     void setRadio(int phoneType) {
         mRadio = getRadioTypeName(phoneType);
+    }
+
+    void setPsc(int psc) {
+        mPsc = psc;
     }
 
     void setCellLocation(CellLocation cl,
