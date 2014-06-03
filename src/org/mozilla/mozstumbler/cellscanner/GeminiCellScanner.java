@@ -55,6 +55,8 @@ class GeminiCellScanner implements CellScanner.CellScannerImpl {
     private boolean mBound;
     private IMtkServiceMode mMtkService;
 
+    private final ScreenMonitor mScreenMonitor;
+
     GeminiCellScanner(Context context) throws UnsupportedOperationException {
         int presentSimNums[] = new int[MAX_GEMINI_SIM_NUM];
         int presentPhoneTypes[] = new int[MAX_GEMINI_SIM_NUM];
@@ -120,6 +122,7 @@ class GeminiCellScanner implements CellScanner.CellScannerImpl {
         }
 
         mContext = context;
+        mScreenMonitor = new ScreenMonitor(context);
 
         Log.i(LOGTAG, "Numbers of available SIM cards: " + Arrays.toString(mPresentSimNums));
     }
@@ -147,6 +150,8 @@ class GeminiCellScanner implements CellScanner.CellScannerImpl {
 
         Intent i = new Intent("ru0xdc.mtk.service.MtkService");
         mContext.bindService(i, mMtkServiceConnection, Context.BIND_AUTO_CREATE);
+
+        mScreenMonitor.start();
     }
 
     @Override
@@ -170,8 +175,9 @@ class GeminiCellScanner implements CellScanner.CellScannerImpl {
             mCdmaDbm.set(i, CellInfo.UNKNOWN_SIGNAL);
         }
 
-        if (mBound) mContext.unbindService(mMtkServiceConnection);
+        mScreenMonitor.stop();
 
+        if (mBound) mContext.unbindService(mMtkServiceConnection);
     }
 
     @Override
@@ -199,6 +205,12 @@ class GeminiCellScanner implements CellScanner.CellScannerImpl {
                     mTelephonyManager, mPresentSimNums[presentSimNumsIndex]
             );
             if (cl == null) {
+                return Collections.emptyList();
+            }
+            if (presentSimNumsIndex == 0) {
+                mScreenMonitor.putLocation(cl);
+            }
+            if (!mScreenMonitor.isLocationValid()) {
                 return Collections.emptyList();
             }
 
