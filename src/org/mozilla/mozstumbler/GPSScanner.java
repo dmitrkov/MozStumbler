@@ -20,7 +20,7 @@ public class GPSScanner implements LocationListener {
 
     private static final String   LOGTAG                  = Scanner.class.getName();
     private static final long     GEO_MIN_UPDATE_TIME     = 1000;
-    private static final float    GEO_MIN_UPDATE_DISTANCE = 10;
+    private static final float    GEO_MIN_UPDATE_DISTANCE = 3;
     private static final int      MIN_SAT_USED_IN_FIX     = 3;
 
     private final Context         mContext;
