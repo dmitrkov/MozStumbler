@@ -2,28 +2,29 @@ package org.mozilla.mozstumbler.cellscanner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.mozilla.mozstumbler.BuildConfig;
 import org.mozilla.mozstumbler.ScannerService;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class CellScanner {
     public static final String CELL_SCANNER_EXTRA_SUBJECT = "CellScanner";
     public static final String CELL_SCANNER_ARG_CELLS = "org.mozilla.mozstumbler.cellscanner.CellScanner.cells";
 
+    private static final boolean DBG = BuildConfig.DEBUG;
     private static final String LOGTAG = CellScanner.class.getName();
     private static final long CELL_MIN_UPDATE_TIME = 1000; // milliseconds
 
     private final Context mContext;
     private CellScannerImpl mImpl;
-    private Timer mCellScanTimer;
+    private Handler mHandler;
     private final Set<String> mCells = new HashSet<String>();
     private int mCurrentCellInfoCount;
 
@@ -52,20 +53,19 @@ public class CellScanner {
         }
 
         mImpl.start();
+        mHandler = new Handler();
+        mHandler.post(mCellScanRunnable);
+    }
 
-        mCellScanTimer = new Timer();
-
-        mCellScanTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Log.d(LOGTAG, "Cell Scanning Timer fired");
-                final long curTime = System.currentTimeMillis();
-                ArrayList<CellInfo> cells = new ArrayList<CellInfo>(mImpl.getCellInfo());
-                mCurrentCellInfoCount = cells.size();
-                if (cells.isEmpty()) {
-                    return;
-                }
-                for (CellInfo cell: cells) mCells.add(cell.getCellIdentity());
+    private final Runnable mCellScanRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (DBG) Log.d(LOGTAG, "Cell Scanning Timer fired");
+            final long curTime = System.currentTimeMillis();
+            ArrayList<CellInfo> cells = new ArrayList<CellInfo>(mImpl.getCellInfo());
+            mCurrentCellInfoCount = cells.size();
+            if (!cells.isEmpty()) {
+                for (CellInfo cell : cells) mCells.add(cell.getCellIdentity());
 
                 Intent intent = new Intent(ScannerService.MESSAGE_TOPIC);
                 intent.putExtra(Intent.EXTRA_SUBJECT, CELL_SCANNER_EXTRA_SUBJECT);
@@ -73,13 +73,14 @@ public class CellScanner {
                 intent.putExtra("time", curTime);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             }
-        }, 0, CELL_MIN_UPDATE_TIME);
-    }
+            mHandler.postDelayed(this, CELL_MIN_UPDATE_TIME);
+        }
+    };
 
     public void stop() {
-        if (mCellScanTimer != null) {
-            mCellScanTimer.cancel();
-            mCellScanTimer = null;
+        if (mHandler != null) {
+            mHandler.removeCallbacks(mCellScanRunnable);
+            mHandler = null;
         }
         if (mImpl != null) {
             mImpl.stop();

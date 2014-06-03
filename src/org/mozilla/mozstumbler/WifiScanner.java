@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -16,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WifiScanner extends BroadcastReceiver {
@@ -29,14 +28,17 @@ public class WifiScanner extends BroadcastReceiver {
     public static final int STATUS_WIFI_DISABLED = -1;
 
     private static final String LOGTAG = Scanner.class.getName();
+    private static final boolean DBG = BuildConfig.DEBUG;
     private static final long WIFI_MIN_UPDATE_TIME = 1000; // milliseconds
 
     private boolean mStarted;
+    private boolean mWifiEnabled;
     private final Context mContext;
     private WifiLock mWifiLock;
-    private Timer mWifiScanTimer;
     private final Set<String> mAPs = Collections.synchronizedSet(new HashSet<String>());
     private AtomicInteger mVisibleAPs = new AtomicInteger();
+
+    private Handler mHandler;
 
     WifiScanner(Context c) {
         mContext = c;
@@ -50,8 +52,12 @@ public class WifiScanner extends BroadcastReceiver {
 
         boolean scanAlways = new Prefs(mContext).getWifiScanAlways();
 
+        mHandler = new Handler();
         if (scanAlways || getWifiManager().isWifiEnabled()) {
+            mWifiEnabled = true;
             activatePeriodicScan();
+        } else {
+            mWifiEnabled = false;
         }
 
         IntentFilter i = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
@@ -77,6 +83,7 @@ public class WifiScanner extends BroadcastReceiver {
             } else {
                 deactivatePeriodicScan();
             }
+            mWifiEnabled = getWifiManager().isWifiEnabled();
         } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
             ArrayList<ScanResult> scanResults = new ArrayList<ScanResult>();
             for (ScanResult scanResult : getWifiManager().getScanResults()) {
@@ -104,46 +111,43 @@ public class WifiScanner extends BroadcastReceiver {
         if (!mStarted) {
             return STATUS_IDLE;
         }
-        if (mWifiScanTimer == null) {
+        if (!mWifiEnabled) {
             return STATUS_WIFI_DISABLED;
         }
         return STATUS_ACTIVE;
     }
 
     private synchronized void activatePeriodicScan() {
-        if (mWifiScanTimer != null) {
-            return;
-        }
-
         Log.v(LOGTAG, "Activate Periodic Scan");
+        if (mWifiLock != null) return;
 
         mWifiLock = getWifiManager().createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY,
                 "MozStumbler");
         mWifiLock.acquire();
-
-        // Ensure that we are constantly scanning for new access points.
-        mWifiScanTimer = new Timer();
-        mWifiScanTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Log.d(LOGTAG, "WiFi Scanning Timer fired");
-                getWifiManager().startScan();
-            }
-        }, 0, WIFI_MIN_UPDATE_TIME);
+        mHandler.post(mTimerTaskRunnable);
     }
 
+    private Runnable mTimerTaskRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mWifiLock == null) return;
+            if (DBG) Log.d(LOGTAG, "WiFi Scanning Timer fired");
+            getWifiManager().startScan();
+            mHandler.postDelayed(this, WIFI_MIN_UPDATE_TIME);
+        }
+    };
+
     private synchronized void deactivatePeriodicScan() {
-        if (mWifiScanTimer == null) {
+        if (mWifiLock == null) {
             return;
         }
 
         Log.v(LOGTAG, "Deactivate periodic scan");
 
+        mHandler.removeCallbacks(mTimerTaskRunnable);
+
         mWifiLock.release();
         mWifiLock = null;
-
-        mWifiScanTimer.cancel();
-        mWifiScanTimer = null;
 
         mVisibleAPs.set(0);
     }
