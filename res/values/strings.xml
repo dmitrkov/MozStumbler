@@ -82,4 +82,7 @@
 
     <string name="refresh_map">Refresh location</string>
 
+    <string name="enable_screen_is_off_workaround">Workaround no Cell Updates When Display Off</string>
+    <string name="enable_screen_is_off_workaround_summary">Activate workaround to update cell when the screen is off. Requires superuser privileges</string>
+
 </resources>

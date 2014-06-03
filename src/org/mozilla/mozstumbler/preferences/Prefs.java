@@ -25,6 +25,7 @@ public final class Prefs {
     private static final String     GEOFENCE_HERE = "geofence_here";
     private static final String     GEOFENCE_SWITCH = "geofence_switch";
             static final String     WIFI_SCAN_ALWAYS = "wifi_scan_always";
+    private static final String     ENABLE_SCREEN_IS_OFF_WORKAROUND_PREF = "enable_screen_is_off_workaround";
 
     private final Context mContext;
 
@@ -102,6 +103,10 @@ public final class Prefs {
 
     public boolean getWifiScanAlways() {
         return getBoolPref(WIFI_SCAN_ALWAYS);
+    }
+
+    public boolean isScreenOffWorkaroundEnabled() {
+        return getPrefs().getBoolean(ENABLE_SCREEN_IS_OFF_WORKAROUND_PREF, false);
     }
 
     ///
