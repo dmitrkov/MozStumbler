@@ -44,5 +44,10 @@
         android:title="@string/additional_server_url_title"
         android:dependency="send_to_additional_server"
         android:defaultValue="http://moz.0xdc.ru/v1/submit" />
+    <CheckBoxPreference
+        android:key="enable_samsung_service_mode"
+        android:title="@string/enable_samsung_service_mode"
+        android:summary="@string/enable_samsung_service_mode_summary"
+        android:defaultValue="false" />
 
 </PreferenceScreen>

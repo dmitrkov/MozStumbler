@@ -86,6 +86,9 @@
     <string name="send_to_additional_server_title">Send reports to an additional server</string>
     <string name="additional_server_url_title">URL of additional server</string>
 
+    <string name="enable_samsung_service_mode">Enable Samsung service mode</string>
+    <string name="enable_samsung_service_mode_summary">Use data available from Samsung Service Mode (if supported)</string>
+
     <string name="wifi_scan_always_title">Always scan Wi-Fi</string>
     <string name="wifi_scan_always_summary">Scan APs even when Wi-Fi is turned off</string>
 
