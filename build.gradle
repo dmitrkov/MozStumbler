@@ -23,6 +23,9 @@ android {
         compile "org.osmdroid:osmdroid-android:4.1"
         compile 'org.slf4j:slf4j-android:1.7.7'
         compile "com.android.support:support-v4:19.0.+"
+        compile(group: 'ch.acra', name: 'acra', version: '4.5.0') {
+            exclude(group: 'org.json', module: 'json')
+        }
     }
 
     sourceSets {
@@ -40,6 +43,7 @@ android {
     defaultConfig {
         buildConfigField "String", "MOZILLA_API_KEY", getMozillaApiKey()
         buildConfigField "String", "TILE_SERVER_URL", getTileServerUrl()
+        buildConfigField "String", "ACRA_URL", getAcraUrl()
     }
 
     signingConfigs {
@@ -88,4 +92,8 @@ String getTileServerUrl() {
         return "\"http://api.tiles.mapbox.com/v3/${project['MapAPIKey']}/\"";
     }
     return "null";
+}
+
+String getAcraUrl() {
+    return project.hasProperty('AcraUrl') ? '"' +  project['AcraUrl'] + '"' : "\"\"";
 }
