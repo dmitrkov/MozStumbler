@@ -202,12 +202,14 @@ public class DefaultCellScanner implements CellScanner.CellScannerImpl {
                                 ident.getLac(),
                                 ident.getCid(),
                                 strength.getAsuLevel());
+                        if (observedCell.isRegistered()) cell.setCellNetworkType(tm.getNetworkType());
                         cells.add(cell);
                     }
                 } else if (observedCell instanceof CellInfoCdma) {
                     CellInfo cell = new CellInfo(tm.getPhoneType());
                     CellIdentityCdma ident = ((CellInfoCdma) observedCell).getCellIdentity();
                     CellSignalStrengthCdma strength = ((CellInfoCdma) observedCell).getCellSignalStrength();
+                    if (observedCell.isRegistered()) cell.setCellNetworkType(tm.getNetworkType());
                     cell.setCdmaCellInfo(ident.getBasestationId(),
                             ident.getNetworkId(),
                             ident.getSystemId(),
@@ -218,6 +220,7 @@ public class DefaultCellScanner implements CellScanner.CellScannerImpl {
                     if (ident.getMnc() != Integer.MAX_VALUE && ident.getMnc() != Integer.MAX_VALUE) {
                         CellInfo cell = new CellInfo(tm.getPhoneType());
                         CellSignalStrengthLte strength = ((CellInfoLte) observedCell).getCellSignalStrength();
+                        if (observedCell.isRegistered()) cell.setCellNetworkType(tm.getNetworkType());
                         cell.setLteCellInfo(ident.getMcc(),
                                 ident.getMnc(),
                                 ident.getCi(),
@@ -237,6 +240,7 @@ public class DefaultCellScanner implements CellScanner.CellScannerImpl {
                                 ident.getCid(),
                                 ident.getPsc(),
                                 strength.getAsuLevel());
+                        if (observedCell.isRegistered()) cell.setCellNetworkType(tm.getNetworkType());
                         cells.add(cell);
                     }
                 } else {

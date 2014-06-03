@@ -187,6 +187,8 @@ final class Reporter extends BroadcastReceiver {
                 jsonItem.put("key", wifi.BSSID);
                 jsonItem.put("frequency", wifi.frequency);
                 jsonItem.put("signal", wifi.level);
+                if (!"<unknown ssid>".equals(wifi.SSID)) jsonItem.put("ssid", wifi.SSID);
+                jsonItem.put("capabilities", wifi.capabilities);
                 wifiJSON.put(jsonItem);
             } catch (JSONException exc) {
                 Log.w(LOGTAG, "JSON exception while serializing wifi data: " + exc);
