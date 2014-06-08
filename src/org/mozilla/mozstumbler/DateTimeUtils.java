@@ -11,7 +11,7 @@ import java.util.TimeZone;
 
 public final class DateTimeUtils {
     private static final DateFormat sLocaleFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-    private static final DateFormat sISO8601Format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static final DateFormat sISO8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
 
     static final long MILLISECONDS_PER_DAY = 86400000;  // milliseconds/day
 
@@ -25,13 +25,6 @@ public final class DateTimeUtils {
     @SuppressLint("SimpleDateFormat")
     static String formatDate(Date date) {
         return sISO8601Format.format(date);
-    }
-
-    public static long removeDay(long time) {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
-        c.set(Calendar.DAY_OF_MONTH,1);
-        return c.getTimeInMillis();
     }
 
     public static String formatTime(long time) {
