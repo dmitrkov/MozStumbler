@@ -277,6 +277,16 @@ public class SamsungServiceModeCellScanner implements CellScanner.CellScannerImp
             return null;
         }
 
+        if (rscp == -371) {
+            Log.v(LOGTAG, "rscp is -371. data: " + Arrays.toString(info.toArray(new String[info.size()])));
+            return null;
+        }
+
+        if (lac == 2147483647 || cid == 2147483647) {
+            Log.v(LOGTAG, "lac or cid =-1. data: " + Arrays.toString(info.toArray(new String[info.size()])));
+            return null;
+        }
+
         cellInfo.setWcmdaCellInfo(mcc, mnc, lac, cid, psc, rscp + 116);
         return cellInfo;
     }
