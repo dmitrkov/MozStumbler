@@ -27,6 +27,7 @@ public class CellScanner {
     private CellScannerImpl mImpl;
     private Handler mHandler;
     private final Set<String> mCells = new HashSet<String>();
+    private final PscWatcher mPscChecker = new PscWatcher();
     private int mCurrentCellInfoCount;
 
     interface CellScannerImpl {
@@ -72,6 +73,7 @@ public class CellScanner {
             }
         }
 
+        mPscChecker.reset();
         mImpl.start();
         mHandler = new Handler();
         mHandler.post(mCellScanRunnable);
@@ -83,6 +85,7 @@ public class CellScanner {
             if (DBG) Log.d(LOGTAG, "Cell Scanning Timer fired");
             final long curTime = System.currentTimeMillis();
             ArrayList<CellInfo> cells = new ArrayList<CellInfo>(mImpl.getCellInfo());
+            cells = mPscChecker.removeInvalidCells(cells);
             mCurrentCellInfoCount = cells.size();
             if (!cells.isEmpty()) {
                 for (CellInfo cell : cells) mCells.add(cell.getCellIdentity());
@@ -114,5 +117,99 @@ public class CellScanner {
 
     public int getCurrentCellInfoCount() {
         return mCurrentCellInfoCount;
+    }
+
+
+    public static class PscWatcher {
+        private static final int WAIT_TIMEOUT_S = 40;
+        private int mLastMcc;
+        private int mLastMnc;
+        private int mLastLac;
+        private int mLastCid;
+        private int mLastPsc;
+        private long mLastUpdateTime;
+
+        public PscWatcher() {
+            reset();
+        }
+
+        public void reset() {
+            mLastMcc = -1;
+            mLastMnc = -1;
+            mLastLac = -1;
+            mLastCid = -1;
+            mLastPsc = -1;
+            mLastUpdateTime = -1;
+        }
+
+        void putCell(CellInfo cell) {
+            if (!isUmtsCellWithCidAndPsc(cell)) {
+                return;
+            }
+
+            if (!isValidCell(cell)) {
+                if (Math.abs(System.nanoTime() - mLastUpdateTime) > WAIT_TIMEOUT_S * 1e9) {
+                    setCell(cell);
+                } else {
+                    Log.i(LOGTAG, "PSC is changed while CID remains the same");
+                }
+            } else {
+                setCell(cell);
+            }
+        }
+
+        public ArrayList<CellInfo> removeInvalidCells(ArrayList<CellInfo> cells) {
+            CellInfo invalidCell = null;
+            for (CellInfo cell: cells) {
+                putCell(cell);
+                if (!isValidCell(cell)) {
+                    invalidCell = cell;
+                    break;
+                }
+            }
+            if (invalidCell == null) {
+                return cells;
+            } else {
+                Log.i(LOGTAG, "PSC is changed while CID remains the same. Remove cell " + invalidCell.getCellIdentity());
+                ArrayList<CellInfo> list = new ArrayList<CellInfo>(cells.size() - 1);
+                for (CellInfo cell: cells) if (invalidCell != cell) list.add(cell);
+                return list;
+            }
+        }
+
+        boolean isValidCell(CellInfo cell) {
+            return !(cell.getPsc() != mLastPsc
+                    && isLastMccMncLacCidEquals(cell));
+        }
+
+        private boolean isUmtsCellWithCidAndPsc(CellInfo cell) {
+            return CellInfo.CELL_RADIO_UMTS.equals(cell.getCellRadio())
+                    && cell.getCid() > 0
+                    && cell.getPsc() > 0;
+        }
+
+        private boolean isLastMccMncLacCidEquals(CellInfo cell) {
+            return (cell.getCid() == mLastCid)
+                    && (cell.getLac() == mLastLac)
+                    && (cell.getMnc() == mLastMnc)
+                    && (cell.getMcc() == mLastMcc);
+        }
+
+        private void setCell(CellInfo cell) {
+            mLastUpdateTime = System.nanoTime();
+            mLastMcc = cell.getMcc();
+            mLastMnc = cell.getMnc();
+            mLastLac = cell.getLac();
+            mLastCid = cell.getCid();
+            mLastPsc = cell.getPsc();
+            if (DBG) Log.v(LOGTAG, "new cell+ " + lastCellToString());
+        }
+
+        private String lastCellToString() {
+            return mLastUpdateTime + " " + mLastMcc + " " + mLastMnc + " "
+                    + mLastLac + " " + mLastCid + " " + mLastPsc;
+        }
+
+
     }
 }
