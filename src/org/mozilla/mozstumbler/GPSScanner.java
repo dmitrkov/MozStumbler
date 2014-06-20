@@ -167,7 +167,7 @@ public class GPSScanner implements LocationListener {
 
     private void reportNewGpsStatus(int fixes, int sats) {
         Intent i = new Intent(ScannerService.MESSAGE_TOPIC);
-        i.putExtra(Intent.EXTRA_SUBJECT, "Scanner");
+        i.putExtra(Intent.EXTRA_SUBJECT, GPS_SCANNER_EXTRA_SUBJECT);
         i.putExtra("fixes", fixes);
         i.putExtra("sats", sats);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);

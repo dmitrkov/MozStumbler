@@ -75,7 +75,8 @@ public final class MainActivity extends FragmentActivity {
 
                 String subject = intent.getStringExtra(Intent.EXTRA_SUBJECT);
 
-                if (subject.equals("Scanner")) {
+                if (subject.equals("Scanner") ||
+                        subject.equals(GPSScanner.GPS_SCANNER_EXTRA_SUBJECT)) {
                     if (intent.hasExtra("fixes")) {
                         mGpsFixes = intent.getIntExtra("fixes", 0);
                         mGpsSats = intent.getIntExtra("sats",0);
@@ -266,7 +267,7 @@ public final class MainActivity extends FragmentActivity {
             Log.e(LOGTAG, "", e);
         }
 
-        String lastLocationString = (mGpsFixes > 0 && locationsScanned > 0)
+        String lastLocationString = (locationsScanned > 0)
                                     ? formatLocation(latitude, longitude)
                                     : "-";
 
